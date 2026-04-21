@@ -1,0 +1,742 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Deal Desk Triage — Peter Abilla for Stedi</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ink-900: #0a0e14;
+  --ink-700: #1f2937;
+  --ink-500: #4b5563;
+  --ink-400: #6b7280;
+  --ink-300: #9ca3af;
+  --paper-100: #ffffff;
+  --paper-200: #f9fafb;
+  --paper-300: #f3f4f6;
+  --paper-400: #e5e7eb;
+  --green-700: #047857;
+  --green-500: #10b981;
+  --green-400: #34d399;
+  --green-100: #d1fae5;
+  --green-50: #ecfdf5;
+  --red-600: #dc2626;
+  --red-500: #ef4444;
+  --red-100: #fee2e2;
+  --red-50: #fef2f2;
+  --amber-600: #d97706;
+  --amber-500: #f59e0b;
+  --amber-100: #fef3c7;
+  --amber-50: #fffbeb;
+  --blue-700: #1d4ed8;
+  --blue-500: #3b82f6;
+  --blue-100: #dbeafe;
+  --blue-50: #eff6ff;
+  --purple-600: #9333ea;
+  --purple-100: #f3e8ff;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; background: var(--paper-200); color: var(--ink-900); line-height: 1.5; -webkit-font-smoothing: antialiased; }
+.container { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
+
+/* Header */
+.header { background: var(--ink-900); color: var(--paper-100); padding: 16px 0; border-bottom: 1px solid var(--ink-700); }
+.header-row { display: flex; justify-content: space-between; align-items: center; }
+.header-brand { font-size: 13px; font-weight: 600; letter-spacing: 0.01em; color: var(--green-400); text-transform: uppercase; }
+.header-meta { font-size: 12px; color: var(--ink-300); font-family: 'JetBrains Mono', monospace; }
+.header-meta a { color: var(--green-400); text-decoration: none; }
+
+/* Hero */
+.hero { padding: 72px 0 48px; border-bottom: 1px solid var(--paper-400); background: var(--paper-100); }
+.hero-eyebrow { font-size: 12px; font-weight: 600; letter-spacing: 0.08em; color: var(--green-700); text-transform: uppercase; margin-bottom: 16px; }
+.hero h1 { font-size: 48px; font-weight: 800; letter-spacing: -0.025em; line-height: 1.05; margin-bottom: 20px; max-width: 820px; }
+.hero p.lede { font-size: 19px; color: var(--ink-500); max-width: 700px; margin-bottom: 28px; line-height: 1.55; }
+.hero-byline { display: flex; gap: 24px; font-size: 13px; color: var(--ink-400); }
+.hero-byline strong { color: var(--ink-700); }
+
+/* Main Grid */
+.main { padding: 48px 0 80px; }
+.grid { display: grid; grid-template-columns: 400px 1fr; gap: 32px; }
+@media (max-width: 900px) { .grid { grid-template-columns: 1fr; } }
+
+/* Panel */
+.panel { background: var(--paper-100); border: 1px solid var(--paper-400); border-radius: 12px; padding: 28px; }
+.panel-title { font-size: 13px; font-weight: 700; letter-spacing: 0.06em; color: var(--ink-700); text-transform: uppercase; margin-bottom: 6px; }
+.panel-sub { font-size: 12px; color: var(--ink-400); margin-bottom: 20px; padding-bottom: 16px; border-bottom: 1px solid var(--paper-400); }
+
+.input-group { margin-bottom: 20px; }
+.input-group:last-child { margin-bottom: 0; }
+.input-label { display: block; font-size: 13px; font-weight: 600; color: var(--ink-700); margin-bottom: 6px; }
+.input-sublabel { font-size: 11px; color: var(--ink-400); margin-bottom: 8px; font-weight: 400; line-height: 1.5; }
+.input-field, .input-select, .input-textarea {
+  width: 100%; padding: 10px 12px; border: 1px solid var(--paper-400); border-radius: 8px;
+  font-size: 14px; font-family: inherit; background: var(--paper-100); color: var(--ink-900);
+  transition: border-color 0.15s;
+}
+.input-textarea { resize: vertical; min-height: 80px; font-family: inherit; }
+.input-field:focus, .input-select:focus, .input-textarea:focus {
+  outline: none; border-color: var(--green-500); box-shadow: 0 0 0 3px var(--green-50);
+}
+.input-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+/* Segmented Control */
+.seg { display: grid; gap: 0; border: 1px solid var(--paper-400); border-radius: 8px; overflow: hidden; }
+.seg-btn {
+  padding: 10px 12px; background: var(--paper-100); border: none; cursor: pointer; font-family: inherit;
+  font-size: 13px; color: var(--ink-500); font-weight: 500; border-bottom: 1px solid var(--paper-400);
+  text-align: left; transition: all 0.1s;
+}
+.seg-btn:last-child { border-bottom: none; }
+.seg-btn:hover { background: var(--paper-200); }
+.seg-btn.active { background: var(--green-50); color: var(--green-700); font-weight: 600; }
+.seg-btn small { display: block; color: var(--ink-400); font-size: 11px; font-weight: 400; margin-top: 2px; }
+.seg-btn.active small { color: var(--green-700); opacity: 0.7; }
+
+/* Checkboxes */
+.check-group { display: flex; flex-direction: column; gap: 8px; }
+.check-row { display: flex; align-items: flex-start; gap: 10px; padding: 10px 12px; border: 1px solid var(--paper-400); border-radius: 8px; cursor: pointer; transition: all 0.1s; }
+.check-row:hover { background: var(--paper-200); }
+.check-row input { margin-top: 2px; accent-color: var(--green-500); }
+.check-row .ct-label { font-size: 13px; color: var(--ink-700); font-weight: 500; }
+.check-row .ct-label small { display: block; color: var(--ink-400); font-size: 11px; font-weight: 400; margin-top: 2px; }
+.check-row.checked { background: var(--green-50); border-color: var(--green-500); }
+
+/* Results */
+.results-header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 20px; }
+.results-header h2 { font-size: 14px; font-weight: 700; letter-spacing: 0.06em; color: var(--ink-700); text-transform: uppercase; }
+
+.verdict-card { background: var(--ink-900); color: var(--paper-100); padding: 36px; border-radius: 12px; margin-bottom: 24px; position: relative; overflow: hidden; }
+.verdict-card::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse at top right, rgba(16, 185, 129, 0.15) 0%, transparent 50%); pointer-events: none; }
+.verdict-card .content { position: relative; }
+.verdict-row { display: flex; justify-content: space-between; align-items: flex-start; gap: 24px; flex-wrap: wrap; margin-bottom: 16px; }
+.verdict-label { font-size: 12px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--green-400); margin-bottom: 8px; }
+.verdict-title { font-size: 36px; font-weight: 800; letter-spacing: -0.02em; line-height: 1.1; margin-bottom: 10px; }
+.verdict-sub { font-size: 15px; opacity: 0.8; line-height: 1.5; }
+.verdict-score { text-align: right; }
+.score-value { font-size: 64px; font-weight: 800; letter-spacing: -0.03em; line-height: 1; color: var(--green-400); }
+.score-out { font-size: 14px; color: var(--ink-300); margin-top: -4px; }
+
+.verdict-routing { margin-top: 20px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.1); display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+@media (max-width: 640px) { .verdict-routing { grid-template-columns: 1fr; } }
+.routing-item { }
+.routing-label { font-size: 11px; color: var(--ink-300); font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; margin-bottom: 6px; }
+.routing-value { font-size: 15px; color: var(--paper-100); font-weight: 600; }
+
+/* Scoring Grid */
+.score-grid { background: var(--paper-100); border: 1px solid var(--paper-400); border-radius: 12px; padding: 24px; margin-bottom: 24px; }
+.score-grid-title { font-size: 13px; font-weight: 700; color: var(--ink-700); letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 16px; }
+.score-item { display: grid; grid-template-columns: 1fr 140px 80px; gap: 16px; padding: 14px 0; border-bottom: 1px solid var(--paper-300); align-items: center; }
+.score-item:last-child { border-bottom: none; }
+.score-item-label { font-size: 13px; color: var(--ink-700); font-weight: 500; }
+.score-item-label small { display: block; color: var(--ink-400); font-size: 11px; font-weight: 400; margin-top: 2px; }
+.score-bar-wrap { width: 100%; height: 8px; background: var(--paper-300); border-radius: 999px; overflow: hidden; }
+.score-bar { height: 100%; background: var(--green-500); border-radius: 999px; transition: width 0.3s ease; }
+.score-bar.low { background: var(--red-500); }
+.score-bar.med { background: var(--amber-500); }
+.score-points { font-family: 'JetBrains Mono', monospace; font-size: 13px; color: var(--ink-700); text-align: right; font-weight: 600; }
+
+/* Flags */
+.flags-panel { background: var(--paper-100); border: 1px solid var(--paper-400); border-radius: 12px; padding: 24px; margin-bottom: 24px; }
+.flag-item { display: flex; align-items: flex-start; gap: 12px; padding: 12px; border-radius: 8px; margin-bottom: 8px; }
+.flag-item:last-child { margin-bottom: 0; }
+.flag-icon { flex-shrink: 0; width: 24px; height: 24px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 12px; }
+.flag-content { font-size: 13px; color: var(--ink-700); line-height: 1.5; flex: 1; }
+.flag-content strong { color: var(--ink-900); }
+.flag-item.green { background: var(--green-50); }
+.flag-item.green .flag-icon { background: var(--green-500); color: white; }
+.flag-item.amber { background: var(--amber-50); }
+.flag-item.amber .flag-icon { background: var(--amber-500); color: white; }
+.flag-item.red { background: var(--red-50); }
+.flag-item.red .flag-icon { background: var(--red-500); color: white; }
+.flag-item.blue { background: var(--blue-50); }
+.flag-item.blue .flag-icon { background: var(--blue-500); color: white; }
+
+/* Brief */
+.brief-panel { background: var(--paper-100); border: 1px solid var(--paper-400); border-radius: 12px; padding: 24px; }
+.brief-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+.brief-header h3 { font-size: 13px; font-weight: 700; color: var(--ink-700); letter-spacing: 0.06em; text-transform: uppercase; }
+.btn-copy {
+  font-size: 12px; padding: 6px 12px; background: var(--paper-200); border: 1px solid var(--paper-400);
+  border-radius: 6px; cursor: pointer; color: var(--ink-700); font-family: inherit; font-weight: 500; transition: all 0.15s;
+}
+.btn-copy:hover { background: var(--paper-300); color: var(--ink-900); }
+.btn-copy.copied { background: var(--green-100); color: var(--green-700); border-color: var(--green-500); }
+.brief-body {
+  background: var(--paper-200); border: 1px solid var(--paper-300); border-radius: 8px; padding: 20px;
+  font-family: 'JetBrains Mono', monospace; font-size: 12.5px; color: var(--ink-700); line-height: 1.7;
+  white-space: pre-wrap; overflow-x: auto;
+}
+
+/* Footer */
+.footer { background: var(--ink-900); color: var(--ink-300); padding: 48px 0; margin-top: 48px; }
+.footer-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 48px; }
+@media (max-width: 700px) { .footer-grid { grid-template-columns: 1fr; } }
+.footer h3 { color: var(--paper-100); font-size: 16px; font-weight: 700; margin-bottom: 12px; }
+.footer p { font-size: 14px; color: var(--ink-300); line-height: 1.65; margin-bottom: 12px; }
+.footer a { color: var(--green-400); text-decoration: none; }
+.footer-links { list-style: none; padding: 0; }
+.footer-links li { margin-bottom: 8px; font-size: 14px; }
+.footer-contact { font-size: 13px; color: var(--ink-400); font-family: 'JetBrains Mono', monospace; margin-top: 16px; }
+.tag { display: inline-block; background: var(--paper-300); color: var(--ink-500); padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 500; margin-left: 6px; }
+
+.badge { display: inline-block; padding: 4px 10px; background: var(--green-50); color: var(--green-700); border: 1px solid var(--green-100); border-radius: 999px; font-size: 11px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; }
+
+/* Method */
+.method { background: var(--paper-100); border: 1px solid var(--paper-400); border-radius: 12px; padding: 24px; margin-top: 24px; }
+.method-header { display: flex; justify-content: space-between; align-items: center; cursor: pointer; user-select: none; }
+.method-header h3 { font-size: 13px; font-weight: 700; color: var(--ink-700); letter-spacing: 0.06em; text-transform: uppercase; }
+.chevron { font-size: 18px; color: var(--ink-400); transition: transform 0.2s; }
+.method.open .chevron { transform: rotate(90deg); }
+.method-body { display: none; margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--paper-400); font-size: 13px; color: var(--ink-500); line-height: 1.7; }
+.method.open .method-body { display: block; }
+.method-body h4 { font-size: 12px; font-weight: 700; color: var(--ink-700); text-transform: uppercase; letter-spacing: 0.04em; margin: 16px 0 8px; }
+.method-body h4:first-child { margin-top: 0; }
+.method-body ul { padding-left: 20px; }
+.method-body li { margin-bottom: 6px; }
+.method-body code { background: var(--paper-300); padding: 2px 6px; border-radius: 4px; font-family: 'JetBrains Mono', monospace; font-size: 12px; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="container header-row">
+    <div class="header-brand">Deal Desk Triage</div>
+    <div class="header-meta">Built for Stedi · by <a href="https://www.linkedin.com/in/papiofficial/" target="_blank">Peter Abilla</a></div>
+  </div>
+</div>
+
+<div class="hero">
+  <div class="container">
+    <div class="hero-eyebrow">Interactive Demo · Pitch Artifact #3</div>
+    <h1>A faster way to decide who takes the inbound demo request.</h1>
+    <p class="lede">At 6x customer growth YoY, inbound volume outpaces the team's ability to read every request twice. This triage tool gives Sales and BizOps a consistent 60-second read on any inbound lead — priority score, suggested tier, routing owner, and a pre-written internal brief. Built to live inside the CRM later; built standalone now so you can stress-test the logic.</p>
+    <div class="hero-byline">
+      <span><strong>What this is:</strong> A deal desk helper demonstrating the CPQ / deal-desk-triage work the BizOps JD calls out — with scoring logic grounded in Stedi's actual ICP signals.</span>
+    </div>
+  </div>
+</div>
+
+<div class="main">
+<div class="container">
+<div class="grid">
+
+<!-- INPUTS -->
+<div>
+<div class="panel">
+<div class="panel-title">Inbound Lead</div>
+<div class="panel-sub">Drop what you know. Leave blanks; scoring degrades gracefully.</div>
+
+<div class="input-group">
+  <label class="input-label" for="companyName">Company</label>
+  <input type="text" class="input-field" id="companyName" placeholder="e.g. Acme Care Partners" value="Acme Care Partners">
+</div>
+
+<div class="input-row">
+  <div class="input-group">
+    <label class="input-label" for="contactName">Primary contact</label>
+    <input type="text" class="input-field" id="contactName" placeholder="Jane Doe, VP Eng" value="Jane Doe, VP Eng">
+  </div>
+  <div class="input-group">
+    <label class="input-label" for="contactTitle">Source</label>
+    <select class="input-select" id="contactSource">
+      <option value="website">Website form</option>
+      <option value="warm" selected>Warm intro</option>
+      <option value="event">Event / conference</option>
+      <option value="outbound">Outbound response</option>
+      <option value="partner">Partner referral</option>
+    </select>
+  </div>
+</div>
+
+<div class="input-group">
+  <label class="input-label">Company stage</label>
+  <div class="seg" id="stageSeg">
+    <button class="seg-btn" data-val="pre-seed">Pre-seed / early<small>&lt; $2M funded, &lt; 15 people</small></button>
+    <button class="seg-btn active" data-val="seed-a">Seed / Series A<small>$2M–$25M funded, 15–75 people</small></button>
+    <button class="seg-btn" data-val="b-c">Series B / C<small>$25M–$150M funded, 75–250 people</small></button>
+    <button class="seg-btn" data-val="late">Late-stage / public<small>$150M+ funded or 250+ people</small></button>
+    <button class="seg-btn" data-val="traditional">Traditional healthtech / incumbent<small>Established player, non-venture-backed</small></button>
+  </div>
+</div>
+
+<div class="input-group">
+  <label class="input-label" for="volEst">Estimated monthly transaction volume</label>
+  <div class="input-sublabel">Back-of-envelope from discovery is fine</div>
+  <input type="number" class="input-field" id="volEst" value="250000" min="0" step="1000">
+</div>
+
+<div class="input-group">
+  <label class="input-label" for="currentVendor">Incumbent vendor (if any)</label>
+  <select class="input-select" id="currentVendor">
+    <option value="none" selected>None / greenfield</option>
+    <option value="change">Change Healthcare / Optum</option>
+    <option value="availity">Availity</option>
+    <option value="waystar">Waystar</option>
+    <option value="trizetto">Trizetto / Cognizant</option>
+    <option value="officeally">Office Ally</option>
+    <option value="pverify">pVerify</option>
+    <option value="other">Other / homegrown</option>
+  </select>
+</div>
+
+<div class="input-group">
+  <label class="input-label">Fit signals (check all that apply)</label>
+  <div class="check-group" id="fitChecks">
+    <label class="check-row"><input type="checkbox" id="sig_genai" checked><div class="ct-label">Native GenAI / AI-first company<small>~1/3 of Stedi's base; strong signal</small></div></label>
+    <label class="check-row"><input type="checkbox" id="sig_api"><div class="ct-label">Explicit need for REST API / programmable<small>Not just "claim submission"</small></div></label>
+    <label class="check-row"><input type="checkbox" id="sig_multi"><div class="ct-label">Multi-payer, multi-state plan<small>Payer network matters to them</small></div></label>
+    <label class="check-row"><input type="checkbox" id="sig_change"><div class="ct-label">Burned by Change outage / concentration risk<small>Explicit migration motivation</small></div></label>
+    <label class="check-row"><input type="checkbox" id="sig_urgent"><div class="ct-label">Urgent timeline (&lt;30 days)<small>Go-live pressure = higher close rate</small></div></label>
+    <label class="check-row"><input type="checkbox" id="sig_refs"><div class="ct-label">Referenceable logo / case study potential<small>Known brand; customer willing to be public</small></div></label>
+    <label class="check-row"><input type="checkbox" id="sig_exp"><div class="ct-label">Expansion path (+$100K ARR visible in 12mo)<small>Growing transaction volume</small></div></label>
+    <label class="check-row"><input type="checkbox" id="sig_complexity"><div class="ct-label">Complex ask: BAA, custom SLA, legal sensitivity<small>Requires senior handling</small></div></label>
+  </div>
+</div>
+
+<div class="input-group">
+  <label class="input-label" for="notes">Discovery notes (optional)</label>
+  <textarea class="input-textarea" id="notes" placeholder="Paste intake form notes or recap..."></textarea>
+</div>
+
+</div>
+</div>
+
+<!-- RESULTS -->
+<div>
+<div class="results-header">
+  <h2>Triage</h2>
+  <span class="badge">Live</span>
+</div>
+
+<div class="verdict-card">
+  <div class="content">
+    <div class="verdict-row">
+      <div>
+        <div class="verdict-label">Priority</div>
+        <div class="verdict-title" id="priorityTitle">—</div>
+        <div class="verdict-sub" id="prioritySub">—</div>
+      </div>
+      <div class="verdict-score">
+        <div class="score-value" id="scoreVal">0</div>
+        <div class="score-out">of 100</div>
+      </div>
+    </div>
+    <div class="verdict-routing">
+      <div class="routing-item">
+        <div class="routing-label">Suggested tier</div>
+        <div class="routing-value" id="tierVal">—</div>
+      </div>
+      <div class="routing-item">
+        <div class="routing-label">Route to</div>
+        <div class="routing-value" id="ownerVal">—</div>
+      </div>
+      <div class="routing-item">
+        <div class="routing-label">Target first response</div>
+        <div class="routing-value" id="slaVal">—</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="score-grid">
+  <div class="score-grid-title">Score Breakdown</div>
+  <div id="scoreItems"></div>
+</div>
+
+<div class="flags-panel">
+  <div class="score-grid-title">Flags & Context</div>
+  <div id="flagsList"></div>
+</div>
+
+<div class="brief-panel">
+  <div class="brief-header">
+    <h3>Auto-generated Deal Brief</h3>
+    <button class="btn-copy" id="btnCopy" onclick="copyBrief()">Copy to clipboard</button>
+  </div>
+  <div class="brief-body" id="briefBody">—</div>
+</div>
+
+<div class="method" id="methodBlock">
+  <div class="method-header" onclick="document.getElementById('methodBlock').classList.toggle('open')">
+    <h3>How this scores — and how I'd improve it in production</h3>
+    <span class="chevron">›</span>
+  </div>
+  <div class="method-body">
+    <h4>Scoring model (simple additive, max 100)</h4>
+    <ul>
+      <li><strong>Volume fit (max 25 pts)</strong> — How well the estimated volume aligns with Stedi's Developer-plan sweet spot (10K-5M/mo) vs. Enterprise (5M+).</li>
+      <li><strong>ICP alignment (max 30 pts)</strong> — Company stage + fit signals (GenAI, API-first, multi-payer, burned by Change). Weighted from the Stedi customer case studies.</li>
+      <li><strong>Competitive dynamics (max 15 pts)</strong> — Incumbent vendor + urgency. Change/Optum incumbents + urgent timeline = highest displacement probability.</li>
+      <li><strong>Expansion & reference potential (max 20 pts)</strong> — Expansion path visible + willing-to-be-referenceable logo. These compound revenue impact beyond the initial deal.</li>
+      <li><strong>Source quality (max 10 pts)</strong> — Warm intro &gt; partner &gt; event &gt; website &gt; outbound response. Higher source quality = faster cycle.</li>
+    </ul>
+
+    <h4>Tier routing logic</h4>
+    <ul>
+      <li><code>Basic (Free / PAYG)</code> → pre-seed, &lt;10K/mo volume, self-serve intent</li>
+      <li><code>Developer ($500/mo)</code> → Seed/A, 10K-500K/mo, API-first, low complexity</li>
+      <li><code>Enterprise (Custom)</code> → 500K+/mo, complex ask (BAA, SLA, custom integration), late-stage or incumbent replacement, multi-year potential</li>
+    </ul>
+
+    <h4>Owner routing logic</h4>
+    <ul>
+      <li><strong>Self-serve / docs</strong> — Low-priority or simple ask. No human yet.</li>
+      <li><strong>AE, small team</strong> — Medium priority. Standard discovery motion.</li>
+      <li><strong>AE + Solutions Engineer</strong> — High priority with complexity flag. Need technical discovery.</li>
+      <li><strong>CEO / VP Sales</strong> — Highest priority: strategic logo, competitive displacement, or reference-grade opportunity.</li>
+    </ul>
+
+    <h4>How I'd harden this for production</h4>
+    <ul>
+      <li><strong>Pull signals automatically</strong> — Clearbit/Gong for company data; LinkedIn for contact title; Crunchbase for funding stage. Reduces manual entry to &lt;5 fields.</li>
+      <li><strong>Close the loop</strong> — Log every triage to Salesforce + tag closed-won/closed-lost outcome 90 days later. Retrain the scoring weights quarterly against actual win rate.</li>
+      <li><strong>Deploy inside Salesforce</strong> — Lightning component or Slack slash command. No separate app, no context-switching for AEs.</li>
+      <li><strong>Add a fast-track lane for Change-outage migrations</strong> — Automatically surface for CEO review; Stedi closed 6+7-figure deals in under an hour during the 2024 outage. Speed is the moat.</li>
+      <li><strong>Instrument the cost of toil</strong> — If the same lead type scores consistently low but still gets routed to humans, that's automation oxygen.</li>
+    </ul>
+
+    <h4>Source material behind the weights</h4>
+    <ul>
+      <li>Stedi customer case studies: Berry Street, Pair Team, Candid Health, Tennr, Adonis, Blueberry ("switching took less than a morning") — <a href="https://www.stedi.com/customers" target="_blank">stedi.com/customers</a></li>
+      <li>Ramp fastest-growing SaaS ranking April 2025 (#3 across all categories), again March 2026 — <a href="https://ramp.com/velocity/top-saas-vendors-on-ramp-march-2026" target="_blank">ramp.com/velocity</a></li>
+      <li>Series B context: "6 and 7 figure deals went from initial phone call or text message to signed terms in under an hour" — <a href="https://stedi.com/blog/series-b" target="_blank">stedi.com/blog/series-b</a></li>
+      <li>Series C: "1/3 of customers are native GenAI companies" — <a href="https://stedi.com/blog/series-c" target="_blank">stedi.com/blog/series-c</a></li>
+    </ul>
+  </div>
+</div>
+
+</div>
+</div>
+</div>
+</div>
+
+<div class="footer">
+<div class="container footer-grid">
+  <div>
+    <h3>About this demo</h3>
+    <p>This is part of a five-artifact package I built as an application for Stedi's <a href="https://dynamitejobs.com/company/stedi/remote-job/business-operations-strategy" target="_blank">Business Operations & Strategy role</a>. I modeled the full package after the pitch I shipped for Deel's <a href="https://chill-aftermath-7e9.notion.site/Deel-Ghostbuster-3333dc2a6a57809b90bff14236d217df" target="_blank">Ghostbuster</a> role.</p>
+    <p>The scoring weights here are educated guesses, calibrated from public Stedi signals. In production I'd retrain them quarterly against actual closed-deal outcomes. Tell me what's miscalibrated — I'd rather fix it than defend it.</p>
+    <div class="footer-contact">
+      Peter Abilla · <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="81f1f2e0e3e8edede0c1e6ece0e8edafe2eeec">[email&#160;protected]</a> · 801-400-3895 · <a href="https://www.linkedin.com/in/papiofficial/" target="_blank">linkedin.com/in/papiofficial</a>
+    </div>
+  </div>
+  <div>
+    <h3>Pitch package</h3>
+    <ul class="footer-links">
+      <li>1 · Five Opportunities I See at Stedi</li>
+      <li>2 · Clearinghouse Cost Comparator</li>
+      <li>3 · Deal Desk Triage <span class="tag">you are here</span></li>
+      <li>4 · Business Systems Data Flow</li>
+      <li>5 · AI Contract Red-Flag Reviewer</li>
+      <li>6 · My First 90 Days</li>
+    </ul>
+  </div>
+</div>
+</div>
+
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+// ==================== MODEL ====================
+let state = {
+  companyName: 'Acme Care Partners',
+  contactName: 'Jane Doe, VP Eng',
+  contactSource: 'warm',
+  stage: 'seed-a',
+  volEst: 250000,
+  currentVendor: 'none',
+  signals: { genai: true, api: false, multi: false, change: false, urgent: false, refs: false, exp: false, complexity: false },
+  notes: ''
+};
+
+// ==================== SCORING ====================
+function score() {
+  let breakdown = [];
+
+  // 1. Volume fit (max 25)
+  let volPts = 0, volDesc = '';
+  const v = state.volEst;
+  if (v >= 10000 && v <= 5000000) {
+    volPts = Math.min(25, 10 + Math.log10(v/10000) * 5);
+    volDesc = v < 100000 ? 'Low-end Dev plan range' : v < 1000000 ? 'Core Dev plan sweet spot' : 'Approaching Enterprise';
+  } else if (v > 5000000) {
+    volPts = 25;
+    volDesc = 'Enterprise-tier volume';
+  } else if (v < 10000) {
+    volPts = Math.max(2, v / 500);
+    volDesc = 'Basic tier; PAYG';
+  }
+  breakdown.push({ label: 'Volume fit', sub: volDesc, points: Math.round(volPts), max: 25 });
+
+  // 2. ICP alignment (max 30)
+  let icpPts = 0, icpNotes = [];
+  const stagePts = { 'pre-seed': 5, 'seed-a': 15, 'b-c': 20, 'late': 15, 'traditional': 10 };
+  icpPts += stagePts[state.stage] || 0;
+  if (state.signals.genai) { icpPts += 5; icpNotes.push('GenAI'); }
+  if (state.signals.api) { icpPts += 3; icpNotes.push('API-first'); }
+  if (state.signals.multi) { icpPts += 2; icpNotes.push('multi-payer'); }
+  icpPts = Math.min(30, icpPts);
+  breakdown.push({ label: 'ICP alignment', sub: icpNotes.length ? icpNotes.join(' · ') : 'Stage-driven baseline', points: icpPts, max: 30 });
+
+  // 3. Competitive (max 15)
+  let compPts = 0, compNotes = [];
+  if (state.signals.change) { compPts += 8; compNotes.push('Change outage motivated'); }
+  if (['change','trizetto','waystar'].includes(state.currentVendor)) { compPts += 4; compNotes.push('legacy incumbent = displaceable'); }
+  if (state.signals.urgent) { compPts += 3; compNotes.push('urgent timeline'); }
+  compPts = Math.min(15, compPts);
+  breakdown.push({ label: 'Competitive dynamics', sub: compNotes.length ? compNotes.join(' · ') : 'Neutral', points: compPts, max: 15 });
+
+  // 4. Expansion & reference (max 20)
+  let expPts = 0, expNotes = [];
+  if (state.signals.exp) { expPts += 12; expNotes.push('expansion path'); }
+  if (state.signals.refs) { expPts += 8; expNotes.push('referenceable logo'); }
+  expPts = Math.min(20, expPts);
+  breakdown.push({ label: 'Expansion + reference', sub: expNotes.length ? expNotes.join(' · ') : 'No expansion signal yet', points: expPts, max: 20 });
+
+  // 5. Source (max 10)
+  const srcPts = { warm: 10, partner: 8, event: 6, website: 4, outbound: 3 };
+  const srcName = { warm: 'Warm intro', partner: 'Partner referral', event: 'Event', website: 'Website form', outbound: 'Outbound response' };
+  breakdown.push({ label: 'Source quality', sub: srcName[state.contactSource], points: srcPts[state.contactSource] || 3, max: 10 });
+
+  const total = breakdown.reduce((s,b) => s + b.points, 0);
+  return { total, breakdown };
+}
+
+function tierRouting(total, breakdown) {
+  const v = state.volEst;
+  const complex = state.signals.complexity;
+
+  let tier, owner, sla, priority, prioritySub;
+
+  // Tier
+  if (v < 10000 && !complex) {
+    tier = 'Basic (Free / PAYG)';
+  } else if (v < 500000 && !complex) {
+    tier = 'Developer ($500/mo)';
+  } else if (v >= 500000 || complex || ['b-c','late'].includes(state.stage)) {
+    tier = 'Enterprise (Custom)';
+  } else {
+    tier = 'Developer ($500/mo)';
+  }
+
+  // Priority
+  if (total >= 75) { priority = 'HIGH'; prioritySub = 'Top-tier opportunity — fast-track now.'; }
+  else if (total >= 55) { priority = 'MEDIUM-HIGH'; prioritySub = 'Strong signals; worth priority AE bandwidth.'; }
+  else if (total >= 35) { priority = 'MEDIUM'; prioritySub = 'Standard discovery. Qualify carefully.'; }
+  else { priority = 'LOW'; prioritySub = 'Doesn\'t clear the bar; push to self-serve.'; }
+
+  // Owner
+  if (total >= 80 && (state.signals.refs || v >= 2000000)) {
+    owner = 'CEO / VP Sales';
+  } else if (total >= 60 || complex) {
+    owner = 'AE + Solutions Engineer';
+  } else if (total >= 35) {
+    owner = 'AE (small team)';
+  } else {
+    owner = 'Self-serve / docs';
+  }
+
+  // SLA
+  if (total >= 75 || state.signals.urgent) { sla = '4 business hours'; }
+  else if (total >= 50) { sla = '1 business day'; }
+  else if (total >= 35) { sla = '2 business days'; }
+  else { sla = 'Self-serve reply'; }
+
+  return { tier, owner, sla, priority, prioritySub };
+}
+
+function buildFlags(total, breakdown, routing) {
+  const flags = [];
+
+  if (state.signals.change) {
+    flags.push({ type: 'green', icon: '✓', text: '<strong>Change-outage migrator.</strong> Stedi closed 6 and 7 figure deals in under an hour during the 2024 outage. This is the highest-intent buyer segment.' });
+  }
+  if (state.signals.genai) {
+    flags.push({ type: 'green', icon: '✓', text: '<strong>Native GenAI fit.</strong> ~1/3 of Stedi\'s customer base. MCP server + API-first = high product-market alignment.' });
+  }
+  if (state.signals.refs) {
+    flags.push({ type: 'blue', icon: 'i', text: '<strong>Reference logo potential.</strong> Loop in Marketing early — expansion + case study value compounds beyond the initial ACV.' });
+  }
+  if (state.signals.complexity) {
+    flags.push({ type: 'amber', icon: '!', text: '<strong>Complexity flag.</strong> BAA / SLA / custom legal. Pull Legal + Solutions Engineering in at first technical call to avoid a 30-day delay later.' });
+  }
+  if (state.signals.urgent) {
+    flags.push({ type: 'amber', icon: '!', text: '<strong>Urgent timeline.</strong> Confirm internal capacity before committing to a go-live date. Urgent deals often expose onboarding bottlenecks.' });
+  }
+  if (state.currentVendor === 'change') {
+    flags.push({ type: 'green', icon: '✓', text: '<strong>Change / Optum incumbent.</strong> Highest displacement probability of any legacy. Lead with concentration-risk + API modernization story.' });
+  }
+  if (state.volEst < 10000) {
+    flags.push({ type: 'blue', icon: 'i', text: '<strong>Below Developer plan sweet spot.</strong> Route to self-serve; they can start on Basic (100 free transactions/type/month).' });
+  }
+  if (state.volEst >= 5000000) {
+    flags.push({ type: 'green', icon: '✓', text: '<strong>Enterprise-tier volume.</strong> Multi-year, volume-discount negotiation; expect procurement + Legal involvement.' });
+  }
+  if (state.stage === 'pre-seed' && state.volEst < 50000) {
+    flags.push({ type: 'amber', icon: '!', text: '<strong>Early-stage risk.</strong> Revenue potential low + runway risk. Triage toward lightweight onboarding; don\'t spend AE hours yet.' });
+  }
+  if (routing.priority === 'LOW') {
+    flags.push({ type: 'blue', icon: 'i', text: '<strong>Self-serve candidate.</strong> Send the docs + sandbox link + "when you hit Developer plan, we\'ll reach out" email. Toil avoided.' });
+  }
+
+  if (flags.length === 0) {
+    flags.push({ type: 'blue', icon: 'i', text: 'Standard-shape deal. No exceptional signals detected; apply default playbook.' });
+  }
+
+  return flags;
+}
+
+function buildBrief(scoreResult, routing, flags) {
+  const { total, breakdown } = scoreResult;
+  const sigList = [];
+  if (state.signals.genai) sigList.push('Native GenAI');
+  if (state.signals.api) sigList.push('API-first requirement');
+  if (state.signals.multi) sigList.push('Multi-payer / multi-state');
+  if (state.signals.change) sigList.push('Change outage migrator');
+  if (state.signals.urgent) sigList.push('Urgent timeline');
+  if (state.signals.refs) sigList.push('Reference-logo potential');
+  if (state.signals.exp) sigList.push('Expansion path visible');
+  if (state.signals.complexity) sigList.push('Legal / compliance complexity');
+
+  const stageLabel = { 'pre-seed': 'Pre-seed / early', 'seed-a': 'Seed / Series A', 'b-c': 'Series B-C', 'late': 'Late-stage / public', 'traditional': 'Traditional healthtech' }[state.stage];
+  const srcLabel = { warm: 'Warm intro', partner: 'Partner referral', event: 'Event', website: 'Website form', outbound: 'Outbound response' }[state.contactSource];
+  const vendorLabel = { none: 'None / greenfield', change: 'Change Healthcare / Optum', availity: 'Availity', waystar: 'Waystar', trizetto: 'Trizetto', officeally: 'Office Ally', pverify: 'pVerify', other: 'Other / homegrown' }[state.currentVendor];
+
+  const fmt = (n) => n >= 1000000 ? (n/1000000).toFixed(1) + 'M' : n >= 1000 ? Math.round(n/1000) + 'K' : n;
+
+  return `DEAL DESK TRIAGE — ${state.companyName || '[Company]'}
+Generated: ${new Date().toISOString().split('T')[0]} · Score: ${total}/100 · Priority: ${routing.priority}
+
+COMPANY
+  Name: ${state.companyName || '—'}
+  Contact: ${state.contactName || '—'}
+  Source: ${srcLabel}
+  Stage: ${stageLabel}
+
+OPPORTUNITY SHAPE
+  Est. volume: ${fmt(state.volEst)}/mo across EDI transaction types
+  Incumbent: ${vendorLabel}
+  Fit signals: ${sigList.length ? sigList.join(' · ') : 'none flagged'}
+
+ROUTING
+  Suggested tier: ${routing.tier}
+  Route to: ${routing.owner}
+  Target first response: ${routing.sla}
+
+SCORE COMPONENTS
+${breakdown.map(b => `  ${b.label.padEnd(24)} ${b.points}/${b.max}  (${b.sub})`).join('\n')}
+
+NEXT STEPS
+  ${routing.priority === 'HIGH' ? '→ Personal outreach from CEO or VP Sales within 4 hours' : ''}${routing.priority === 'HIGH' ? '\n  → Discovery call scheduled; loop in SE if complexity flagged' : ''}
+  ${routing.priority === 'MEDIUM-HIGH' ? '→ AE + SE respond within 1 business day' : ''}${routing.priority === 'MEDIUM-HIGH' ? '\n  → Standard discovery flow; flag expansion signals' : ''}
+  ${routing.priority === 'MEDIUM' ? '→ AE responds within 2 business days' : ''}${routing.priority === 'MEDIUM' ? '\n  → Qualify hard on volume + timeline before booking SE time' : ''}
+  ${routing.priority === 'LOW' ? '→ Send docs + sandbox + "self-serve works for your shape today" email' : ''}${routing.priority === 'LOW' ? '\n  → Re-trigger if volume estimates move materially' : ''}
+
+NOTES
+${state.notes ? state.notes.split('\n').map(l => '  ' + l).join('\n') : '  —'}
+`;
+}
+
+// ==================== RENDER ====================
+function render() {
+  const sr = score();
+  const routing = tierRouting(sr.total, sr.breakdown);
+  const flags = buildFlags(sr.total, sr.breakdown, routing);
+
+  // Verdict
+  document.getElementById('priorityTitle').textContent = routing.priority;
+  document.getElementById('prioritySub').textContent = routing.prioritySub;
+  document.getElementById('scoreVal').textContent = sr.total;
+  document.getElementById('tierVal').textContent = routing.tier;
+  document.getElementById('ownerVal').textContent = routing.owner;
+  document.getElementById('slaVal').textContent = routing.sla;
+
+  // Update score value color based on priority
+  const scoreValEl = document.getElementById('scoreVal');
+  const priorityColor = {
+    'HIGH': 'var(--green-400)',
+    'MEDIUM-HIGH': 'var(--green-400)',
+    'MEDIUM': 'var(--amber-500)',
+    'LOW': 'var(--red-500)'
+  };
+  scoreValEl.style.color = priorityColor[routing.priority] || 'var(--green-400)';
+
+  // Score breakdown
+  const container = document.getElementById('scoreItems');
+  container.innerHTML = sr.breakdown.map(b => {
+    const pct = Math.round((b.points / b.max) * 100);
+    const cls = pct >= 70 ? '' : pct >= 40 ? 'med' : 'low';
+    return `<div class="score-item">
+      <div class="score-item-label">${b.label}<small>${b.sub}</small></div>
+      <div class="score-bar-wrap"><div class="score-bar ${cls}" style="width: ${pct}%"></div></div>
+      <div class="score-points">${b.points}/${b.max}</div>
+    </div>`;
+  }).join('');
+
+  // Flags
+  document.getElementById('flagsList').innerHTML = flags.map(f => `
+    <div class="flag-item ${f.type}">
+      <div class="flag-icon">${f.icon}</div>
+      <div class="flag-content">${f.text}</div>
+    </div>
+  `).join('');
+
+  // Brief
+  document.getElementById('briefBody').textContent = buildBrief(sr, routing, flags);
+}
+
+// ==================== WIRING ====================
+document.querySelectorAll('#stageSeg .seg-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('#stageSeg .seg-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    state.stage = btn.dataset.val;
+    render();
+  });
+});
+
+const inputMap = {
+  companyName: (v) => state.companyName = v,
+  contactName: (v) => state.contactName = v,
+  contactSource: (v) => state.contactSource = v,
+  volEst: (v) => state.volEst = parseFloat(v) || 0,
+  currentVendor: (v) => state.currentVendor = v,
+  notes: (v) => state.notes = v
+};
+Object.keys(inputMap).forEach(id => {
+  const el = document.getElementById(id);
+  el.addEventListener('input', () => { inputMap[id](el.value); render(); });
+  el.addEventListener('change', () => { inputMap[id](el.value); render(); });
+});
+
+const sigMap = {
+  sig_genai: 'genai', sig_api: 'api', sig_multi: 'multi', sig_change: 'change',
+  sig_urgent: 'urgent', sig_refs: 'refs', sig_exp: 'exp', sig_complexity: 'complexity'
+};
+Object.keys(sigMap).forEach(id => {
+  const el = document.getElementById(id);
+  el.addEventListener('change', () => {
+    state.signals[sigMap[id]] = el.checked;
+    el.closest('.check-row').classList.toggle('checked', el.checked);
+    render();
+  });
+  // Set initial checked styling
+  if (el.checked) el.closest('.check-row').classList.add('checked');
+});
+
+function copyBrief() {
+  const text = document.getElementById('briefBody').textContent;
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = document.getElementById('btnCopy');
+    btn.textContent = 'Copied ✓';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = 'Copy to clipboard'; btn.classList.remove('copied'); }, 1800);
+  });
+}
+
+render();
+</script>
+
+</body>
+</html>
